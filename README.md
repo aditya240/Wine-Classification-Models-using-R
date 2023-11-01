@@ -4,9 +4,12 @@
 This project focuses on classifying wines into two categories based on their color: red or white. The analysis is conducted using various classification techniques in R, utilizing libraries for data manipulation, modeling, and visualization. The dataset used for this analysis is the Wine Quality Dataset from the UCI Machine Learning Repository.
 
 ## Data Description
-The dataset comprises various attributes of wines, including chemical properties and quality ratings. For this analysis, the datasets for red and white wines are used separately. Each dataset includes several variables, such as volatile acidity and total sulfur dioxide, which are used as features for the classification models.
+'winequality-red.csv' and 'winequality-white.csv' contain the dataset. It comprises various attributes of wines, including chemical properties and quality ratings. For this analysis, the datasets for red and white wines are used separately. Each dataset includes several variables, such as volatile acidity and total sulfur dioxide, which are used as features for the classification models.
 
 ## File Structure
+
+- `winequality-red.csv`: The csv file containing the dataset.
+- `winequality-white.csv`: The csv file containing the dataset.
 - `wine_classify.Rmd`: The R Markdown file containing all the code, descriptions, and visualizations.
 
 ## Libraries Used
@@ -50,6 +53,3 @@ The dataset comprises various attributes of wines, including chemical properties
 
 ## Conclusion
 This project demonstrates the application of various classification techniques to a wine quality dataset, with the goal of classifying wines based on their color. The models' performances are evaluated using classification error rates, and the results are visualized to provide insights into the dataset and the modeling techniques used. LDA, Logistic Regression, and QDA are found to perform better compared to the KNN models in this particular scenario.
-
-## Contact
-For any queries or further information, please contact the author at aj834@yourdomain.com.
