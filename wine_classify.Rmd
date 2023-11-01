@@ -1,0 +1,129 @@
+---
+title: "Wine CLassification Models"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+```{r}
+library(tibble)
+library(tidyverse)
+
+red_wine <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv", sep = ";")
+white_wine <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-white.csv", sep = ";")
+
+red_wine <- tibble(red_wine)
+white_wine <- tibble(white_wine)
+red_wine <- red_wine %>% add_column(color = "red")
+white_wine <- white_wine %>% add_column(color = "white")
+
+```
+
+```{r}
+library(dplyr)
+
+set.seed(123)
+
+red_train <- red_wine %>% sample_n(1000)
+white_train <- white_wine %>% sample_n(1000)
+
+training_set <- bind_rows(red_train, white_train)
+testing_set <- bind_rows(setdiff(red_wine, red_train), setdiff(white_wine, white_train))
+
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(training_set, aes(x = volatile.acidity, y = total.sulfur.dioxide, color = color)) + 
+  geom_point()
+
+training_set <- training_set %>% mutate(color_binary = ifelse(color == "red", 1, 0))
+testing_set <- testing_set %>% mutate(color_binary = ifelse(color == "red", 1, 0))
+
+```
+
+The decision boundary appears to be non-linear, with red wines having higher values for both volatile acidity and total sulfur dioxide.
+
+```{r}
+library(MASS)
+library(FNN)
+
+logistic <- glm(color_binary ~ volatile.acidity + total.sulfur.dioxide, data = training_set, family = "binomial")
+lda <- lda(color ~ volatile.acidity + total.sulfur.dioxide, data = training_set)
+qda <- qda(color ~ volatile.acidity + total.sulfur.dioxide, data = training_set)
+knn3 <- knn(train = training_set[,c("volatile.acidity", "total.sulfur.dioxide")], 
+            test = testing_set[,c("volatile.acidity", "total.sulfur.dioxide")], 
+            cl = training_set$color, k = 3)
+knn9 <- knn(train = training_set[,c("volatile.acidity", "total.sulfur.dioxide")], 
+            test = testing_set[,c("volatile.acidity", "total.sulfur.dioxide")], 
+            cl = training_set$color, k = 9)
+
+```
+
+```{r}
+library(ggplot2)
+
+testing_set$logistic <- predict(logistic, newdata = testing_set, type = "response")
+testing_set$lda <- predict(lda, newdata = testing_set)$class
+testing_set$qda <- predict(qda, newdata = testing_set)$class
+testing_set$knn3 <- knn3
+testing_set$knn9 <- knn9
+
+ggplot(testing_set, aes(x = volatile.acidity, y = total.sulfur.dioxide, color = color)) + 
+  geom_point(alpha = 0.5) + 
+  geom_point(aes(color = logistic > 0.5), shape = 1, size = 3) + 
+  ggtitle("Logistic Regression")
+
+ggplot(testing_set, aes(x = volatile.acidity, y = total.sulfur.dioxide, color = color)) + 
+  geom_point(alpha = 0.5) + 
+  geom_point(aes(color = lda), shape = 1, size = 3) + 
+  ggtitle("LDA")
+
+ggplot(testing_set, aes(x = volatile.acidity, y = total.sulfur.dioxide, color = color)) + 
+  geom_point(alpha = 0.5) + 
+  geom_point(aes(color = qda), shape = 1, size = 3) + 
+  ggtitle("QDA")
+
+ggplot(testing_set, aes(x = volatile.acidity, y = total.sulfur.dioxide, color = color)) + 
+  geom_point(alpha = 0.5) + 
+  geom_point(aes(color = knn3), shape = 1, size = 3) + 
+  ggtitle("KNN (K = 3)")
+
+ggplot(testing_set, aes(x = volatile.acidity, y = total.sulfur.dioxide, color = color)) + 
+  geom_point(alpha = 0.5) + 
+  geom_point(aes(color = knn9), shape = 1, size = 3) + 
+  ggtitle("KNN (K = 9)")
+
+```
+
+```{r}
+logistic_train_error <- mean(training_set$color_binary != (predict(logistic, type = "response") > 0.5))
+logistic_test_error <- mean(testing_set$color_binary != (testing_set$logistic > 0.5))
+
+lda_train_error <- mean(training_set$color != predict(lda)$class)
+lda_test_error <- mean(testing_set$color != testing_set$lda)
+
+qda_train_error <- mean(training_set$color != predict(qda)$class)
+qda_test_error <- mean(testing_set$color != testing_set$qda)
+
+knn3_train_error <- mean(training_set$color != knn3)
+knn3_test_error <- mean(testing_set$color != knn3)
+
+knn9_train_error <- mean(training_set$color != knn9)
+knn9_test_error <- mean(testing_set$color != knn9)
+
+# Create a table of errors
+error_table <- tibble(
+  Model = c("Logistic Regression", "LDA", "QDA", "KNN (K = 3)", "KNN (K = 9)"),
+  Training_Error = c(logistic_train_error, lda_train_error, qda_train_error, knn3_train_error, knn9_train_error),
+  Testing_Error = c(logistic_test_error, lda_test_error, qda_test_error, knn3_test_error, knn9_test_error)
+)
+
+print(error_table)
+
+
+
+```
+
+The LDA, Logistic Regression, QDA have the least testing errors and training errors as shown above. Compared the KNN models have relatively high testing and training errors.
