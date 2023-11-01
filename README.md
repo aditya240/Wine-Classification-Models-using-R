@@ -7,7 +7,7 @@ This project focuses on classifying wines into two categories based on their col
 The dataset comprises various attributes of wines, including chemical properties and quality ratings. For this analysis, the datasets for red and white wines are used separately. Each dataset includes several variables, such as volatile acidity and total sulfur dioxide, which are used as features for the classification models.
 
 ## File Structure
-- `Homework 4 - aj834.Rmd`: The R Markdown file containing all the code, descriptions, and visualizations.
+- `wine_classify.Rmd`: The R Markdown file containing all the code, descriptions, and visualizations.
 
 ## Libraries Used
 - `tibble`: For creating and manipulating tibbles, a modern version of data frames in R.
